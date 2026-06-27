@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { connectDB } from "@/lib/mongodb";
 import Registration from "@/lib/models/Registration";
+import { sendPaymentConfirmation } from "@/lib/email";
+import type { House } from "@/lib/models/Registration";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -39,6 +41,11 @@ export async function PUT(
   const { id } = await params;
   const body = await req.json();
 
+  const prevDoc = await Registration.findById(id);
+  if (!prevDoc) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const updated = await Registration.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true,
@@ -47,6 +54,21 @@ export async function PUT(
   if (!updated) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  // Send confirmation email when status changes to paid
+  if (body.status === "paid" && prevDoc.status !== "paid") {
+    try {
+      await sendPaymentConfirmation(
+        updated.email,
+        updated.firstName,
+        updated.house as House,
+        updated.registrationId
+      );
+    } catch (emailErr) {
+      console.error("Email send failed:", emailErr);
+    }
+  }
+
   return NextResponse.json(updated);
 }
 

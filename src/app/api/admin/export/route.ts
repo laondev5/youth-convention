@@ -7,6 +7,8 @@ import * as XLSX from "xlsx";
 
 function flattenRecord(r: IRegistration) {
   return {
+    "Registration ID": r.registrationId,
+    Status: r.status,
     "First Name": r.firstName,
     Surname: r.surname,
     DOB: `${r.dob.day}/${r.dob.month}/${r.dob.year}`,
@@ -20,6 +22,8 @@ function flattenRecord(r: IRegistration) {
     Email: r.email,
     Education: r.education,
     "Health Conditions": r.healthConditions,
+    "Parent/Guardian Name": r.parentGuardianName || "",
+    "Parent/Guardian Phone": r.parentGuardianPhone || "",
     "Registered At": new Date(r.registeredAt).toLocaleString(),
   };
 }

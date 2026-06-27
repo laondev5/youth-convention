@@ -4,6 +4,7 @@ export const HOUSES = ["FIRE", "WATER", "WIND", "ICE"] as const;
 export type House = (typeof HOUSES)[number];
 
 export interface IRegistration extends Document {
+  registrationId: string;
   firstName: string;
   surname: string;
   dob: { day: number; month: number; year: number };
@@ -16,12 +17,16 @@ export interface IRegistration extends Document {
   email: string;
   education: "Secondary School" | "University" | "Graduate" | "Working";
   healthConditions: string;
+  parentGuardianName: string;
+  parentGuardianPhone: string;
   house: House;
+  status: "pending" | "paid";
   registeredAt: Date;
 }
 
 const RegistrationSchema = new Schema<IRegistration>(
   {
+    registrationId: { type: String, required: true, unique: true },
     firstName: { type: String, required: true, trim: true },
     surname: { type: String, required: true, trim: true },
     dob: {
@@ -42,7 +47,10 @@ const RegistrationSchema = new Schema<IRegistration>(
       required: true,
     },
     healthConditions: { type: String, trim: true, default: "None" },
+    parentGuardianName: { type: String, trim: true, default: "" },
+    parentGuardianPhone: { type: String, trim: true, default: "" },
     house: { type: String, enum: HOUSES, required: true },
+    status: { type: String, enum: ["pending", "paid"], default: "pending" },
     registeredAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Registration, { HOUSES } from "@/lib/models/Registration";
-import { sendRegistrationConfirmation } from "@/lib/email";
 
 function assignHouse() {
   return HOUSES[Math.floor(Math.random() * HOUSES.length)];
+}
+
+function generateRegistrationId(): string {
+  const year = new Date().getFullYear();
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const suffix = Array.from({ length: 6 }, () =>
+    chars[Math.floor(Math.random() * chars.length)]
+  ).join("");
+  return `LFF${year}-${suffix}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -25,34 +33,65 @@ export async function POST(req: NextRequest) {
       email,
       education,
       healthConditions,
+      parentGuardianName,
+      parentGuardianPhone,
     } = body;
 
     const house = assignHouse();
 
-    const registration = await Registration.create({
-      firstName,
-      surname,
-      dob,
-      sex,
-      churchName,
-      country,
-      state,
-      hobbies: hobbies || "",
-      contactPhone,
-      email,
-      education,
-      healthConditions: healthConditions || "None",
-      house,
-    });
-
+    // Retry once if registrationId collides (extremely unlikely)
+    let registrationId = generateRegistrationId();
+    let registration;
     try {
-      await sendRegistrationConfirmation(email, firstName, house);
-    } catch (emailErr) {
-      console.error("Email send failed:", emailErr);
+      registration = await Registration.create({
+        registrationId,
+        firstName,
+        surname,
+        dob,
+        sex,
+        churchName,
+        country,
+        state,
+        hobbies: hobbies || "",
+        contactPhone,
+        email,
+        education,
+        healthConditions: healthConditions || "None",
+        parentGuardianName: parentGuardianName || "",
+        parentGuardianPhone: parentGuardianPhone || "",
+        house,
+        status: "pending",
+      });
+    } catch (err: unknown) {
+      const mongoErr = err as { code?: number };
+      if (mongoErr?.code === 11000) {
+        registrationId = generateRegistrationId();
+        registration = await Registration.create({
+          registrationId,
+          firstName,
+          surname,
+          dob,
+          sex,
+          churchName,
+          country,
+          state,
+          hobbies: hobbies || "",
+          contactPhone,
+          email,
+          education,
+          healthConditions: healthConditions || "None",
+          parentGuardianName: parentGuardianName || "",
+          parentGuardianPhone: parentGuardianPhone || "",
+          house,
+          status: "pending",
+        });
+      } else {
+        throw err;
+      }
     }
 
     return NextResponse.json(
-      { message: "Registration successful", id: registration._id, house },
+      { message: "Registration saved", id: registration._id, registrationId },
       { status: 201 }
     );
   } catch (error: unknown) {

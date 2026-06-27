@@ -20,20 +20,27 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
+  const statusFilter = searchParams.get("status") || "";
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
-  const query = search
-    ? {
-        $or: [
-          { firstName: { $regex: search, $options: "i" } },
-          { surname: { $regex: search, $options: "i" } },
-          { email: { $regex: search, $options: "i" } },
-          { churchName: { $regex: search, $options: "i" } },
-        ],
-      }
-    : {};
+  // Build query
+  const query: Record<string, unknown> = {};
+
+  if (search) {
+    query.$or = [
+      { firstName: { $regex: search, $options: "i" } },
+      { surname: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+      { churchName: { $regex: search, $options: "i" } },
+      { registrationId: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  if (statusFilter === "pending" || statusFilter === "paid") {
+    query.status = statusFilter;
+  }
 
   const [registrations, total] = await Promise.all([
     Registration.find(query).sort({ registeredAt: -1 }).skip(skip).limit(limit),

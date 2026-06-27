@@ -12,23 +12,24 @@ const transporter = nodemailer.createTransport({
 });
 
 const HOUSE_COLORS: Record<House, { bg: string; text: string; emoji: string }> = {
-  FIRE: { bg: "#fef2f2", text: "#b91c1c", emoji: "🔥" },
+  FIRE:  { bg: "#fef2f2", text: "#b91c1c", emoji: "🔥" },
   WATER: { bg: "#eff6ff", text: "#1d4ed8", emoji: "💧" },
-  WIND: { bg: "#f0fdf4", text: "#15803d", emoji: "🌬️" },
-  ICE: { bg: "#f0f9ff", text: "#0369a1", emoji: "❄️" },
+  WIND:  { bg: "#f0fdf4", text: "#15803d", emoji: "🌬️" },
+  ICE:   { bg: "#f0f9ff", text: "#0369a1", emoji: "❄️" },
 };
 
-export async function sendRegistrationConfirmation(
+export async function sendPaymentConfirmation(
   to: string,
   name: string,
-  house: House
+  house: House,
+  registrationId: string
 ) {
   const houseStyle = HOUSE_COLORS[house];
 
   await transporter.sendMail({
     from: `"LFF Youth Convention" <${process.env.SMTP_USER}>`,
     to,
-    subject: `Registration Confirmed – You're in House ${house}! | LFF Youth Convention`,
+    subject: `Payment Confirmed – Welcome to House ${house}! | LFF Youth Convention`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:24px;background:#f9f9f9;border-radius:8px;">
         <div style="text-align:center;margin-bottom:24px;">
@@ -37,8 +38,15 @@ export async function sendRegistrationConfirmation(
         <div style="background:#fff;padding:24px;border-radius:8px;border:1px solid #e5e7eb;">
           <h2 style="color:#1f2937;">Hello ${name}! 🎉</h2>
           <p style="color:#4b5563;font-size:16px;line-height:1.6;">
-            Your registration for the <strong>LFF Youth Convention</strong> has been received and confirmed.
+            Your payment has been confirmed and your registration for the
+            <strong>LFF Youth Convention</strong> is now complete!
           </p>
+
+          <div style="margin:20px 0;padding:16px;background:#f0fdf4;border-left:4px solid #16a34a;border-radius:4px;">
+            <p style="margin:0;color:#15803d;font-weight:bold;font-size:14px;">Registration ID</p>
+            <p style="margin:6px 0 0;font-size:24px;font-weight:900;color:#111827;letter-spacing:2px;">${registrationId}</p>
+            <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">Keep this ID safe — you will need it at the venue.</p>
+          </div>
 
           <div style="margin:24px 0;padding:20px;background:${houseStyle.bg};border:2px solid ${houseStyle.text};border-radius:12px;text-align:center;">
             <p style="margin:0 0 8px;color:#6b7280;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Your House Assignment</p>

@@ -41,6 +41,8 @@ interface FormData {
   email: string;
   education: string;
   healthConditions: string;
+  parentGuardianName: string;
+  parentGuardianPhone: string;
 }
 
 const initialForm: FormData = {
@@ -58,6 +60,8 @@ const initialForm: FormData = {
   email: "",
   education: "",
   healthConditions: "",
+  parentGuardianName: "",
+  parentGuardianPhone: "",
 };
 
 export default function RegistrationPage() {
@@ -98,12 +102,17 @@ export default function RegistrationPage() {
           email: form.email,
           education: form.education,
           healthConditions: form.healthConditions || "None",
+          parentGuardianName: form.parentGuardianName,
+          parentGuardianPhone: form.parentGuardianPhone,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Registration failed");
-      router.push(`/success?house=${data.house}`);
+
+      // Redirect to payment page after saving registration as pending
+      window.location.href =
+        "https://my.churchplus.co/forms/a02abf6b-fbdb-413c-e0f6-08ded0fde966";
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -349,13 +358,61 @@ export default function RegistrationPage() {
             />
           </div>
 
+          {/* Parent / Guardian */}
+          <div className="border-t border-gray-100 pt-5">
+            <p className="text-sm font-semibold text-gray-700 mb-4">
+              Parent / Guardian <span className="text-gray-400 font-normal">(optional)</span>
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Name</label>
+                <input
+                  name="parentGuardianName"
+                  value={form.parentGuardianName}
+                  onChange={handleChange}
+                  placeholder="Parent or guardian full name"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Phone Number</label>
+                <input
+                  name="parentGuardianPhone"
+                  value={form.parentGuardianPhone}
+                  onChange={handleChange}
+                  type="tel"
+                  placeholder="+234 800 000 0000"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition text-sm"
+            className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2"
           >
-            {loading ? "Submitting…" : "Register Now"}
+            {loading ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+                Saving…
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Pay Now / Make Payment
+              </>
+            )}
           </button>
+          <p className="text-center text-xs text-gray-400">
+            You will be redirected to our secure payment page after submitting.
+          </p>
         </form>
 
       </div>
