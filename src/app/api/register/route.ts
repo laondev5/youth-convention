@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import Registration from "@/lib/models/Registration";
+import Registration, { HOUSES } from "@/lib/models/Registration";
 import { sendRegistrationConfirmation } from "@/lib/email";
+
+function assignHouse() {
+  return HOUSES[Math.floor(Math.random() * HOUSES.length)];
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,6 +27,8 @@ export async function POST(req: NextRequest) {
       healthConditions,
     } = body;
 
+    const house = assignHouse();
+
     const registration = await Registration.create({
       firstName,
       surname,
@@ -36,17 +42,17 @@ export async function POST(req: NextRequest) {
       email,
       education,
       healthConditions: healthConditions || "None",
+      house,
     });
 
-    // Send confirmation email (don't fail the request if email errors)
     try {
-      await sendRegistrationConfirmation(email, firstName);
+      await sendRegistrationConfirmation(email, firstName, house);
     } catch (emailErr) {
       console.error("Email send failed:", emailErr);
     }
 
     return NextResponse.json(
-      { message: "Registration successful", id: registration._id },
+      { message: "Registration successful", id: registration._id, house },
       { status: 201 }
     );
   } catch (error: unknown) {

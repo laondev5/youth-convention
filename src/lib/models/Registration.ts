@@ -1,5 +1,8 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+export const HOUSES = ["FIRE", "WATER", "WIND", "ICE"] as const;
+export type House = (typeof HOUSES)[number];
+
 export interface IRegistration extends Document {
   firstName: string;
   surname: string;
@@ -13,6 +16,7 @@ export interface IRegistration extends Document {
   email: string;
   education: "Secondary School" | "University" | "Graduate" | "Working";
   healthConditions: string;
+  house: House;
   registeredAt: Date;
 }
 
@@ -38,6 +42,7 @@ const RegistrationSchema = new Schema<IRegistration>(
       required: true,
     },
     healthConditions: { type: String, trim: true, default: "None" },
+    house: { type: String, enum: HOUSES, required: true },
     registeredAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

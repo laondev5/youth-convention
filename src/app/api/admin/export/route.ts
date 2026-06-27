@@ -11,6 +11,7 @@ function flattenRecord(r: IRegistration) {
     Surname: r.surname,
     DOB: `${r.dob.day}/${r.dob.month}/${r.dob.year}`,
     Sex: r.sex,
+    House: r.house,
     "Church Name": r.churchName,
     Country: r.country,
     State: r.state,

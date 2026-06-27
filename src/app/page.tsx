@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const COUNTRIES = [
   "Nigeria", "Ghana", "Kenya", "South Africa", "Uganda", "Tanzania",
@@ -102,7 +103,7 @@ export default function RegistrationPage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Registration failed");
-      router.push("/success");
+      router.push(`/success?house=${data.house}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -111,16 +112,23 @@ export default function RegistrationPage() {
   };
 
   const inputClass =
-    "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition";
+    "w-full rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
-  const selectClass = inputClass + " bg-white";
+  const selectClass = "w-full rounded-lg border border-gray-300 bg-white text-gray-900 px-4 py-2.5 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition appearance-none";
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 py-10 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full mb-4">
-            <span className="text-white text-2xl font-bold">✝</span>
+          <div className="mb-4">
+            <Image
+              src="/logo.png"
+              alt="LFF Youth Convention Logo"
+              width={100}
+              height={100}
+              className="mx-auto object-contain"
+              priority
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">LFF Youth Convention</h1>
           <p className="text-gray-500 mt-2">Complete the form below to register</p>
@@ -350,12 +358,6 @@ export default function RegistrationPage() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Admin?{" "}
-          <a href="/admin" className="text-purple-600 hover:underline">
-            Login here
-          </a>
-        </p>
       </div>
     </main>
   );
