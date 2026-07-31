@@ -111,8 +111,7 @@ export default function RegistrationPage() {
       if (!res.ok) throw new Error(data.error || "Registration failed");
 
       // Redirect to payment page after saving registration as pending
-      window.location.href =
-        "https://my.churchplus.co/forms/a02abf6b-fbdb-413c-e0f6-08ded0fde966";
+      window.location.href = "https://pay.seerbitapi.com/77674938";
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
